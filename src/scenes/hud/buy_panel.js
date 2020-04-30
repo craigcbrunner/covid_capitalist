@@ -3,8 +3,12 @@ import constants from '../../utils/constants';
 import businesses from '../../data/businesses';
 
 import { Viewport, Column } from 'phaser-ui-tools';
-const BUTTON_HEIGHT = 100;
+import GameStateManager from '../../utils/GameStateManager';
+const BUTTON_HEIGHT = 120;
 const BUTTON_WIDTH = constants.SIDE_PANEL_WIDTH;
+
+const BuyButtons = {};
+const PriceTexts = {};
 export default class BuyPanel extends Phaser.Scene
 {
 	constructor()
@@ -20,6 +24,95 @@ export default class BuyPanel extends Phaser.Scene
         });
 
 
+    }
+
+    updatePriceText = (name) => {
+        const text = PriceTexts[name];
+
+        text.setText(`$${GameStateManager.getCurrentBusinessPrice(name)}`);
+        
+    }
+
+    createPriceText(name) {
+        var style = {font: "18px money", fill: constants.MONEY_FONT_COLOR};
+        const priceText = this.add.text(0, 0, 'N/A', style);
+        PriceTexts[name] = priceText;
+
+        this.updatePriceText(name);
+
+        priceText.setShadow(2, 2, "#333333", 2, false, true);
+
+        priceText.setOrigin(0.5, 0)
+
+
+
+        return priceText;
+    }
+
+    updateBuyButton = (name) => {
+        const button = BuyButtons[name];
+        const canBuy = GameStateManager.canBuyBusiness(name);
+        if (canBuy && button.isDisabled ) {
+            button.setFill(constants.BUY_TEXT_COLOR);
+            button.setStroke(constants.BUY_STROKE_COLOR, 6);
+            button.setOrigin(0.5, -0.8)
+
+            button.isDisabled = false;
+
+        }
+        else if (!canBuy && !button.isDisabled) {
+            button.setFill(constants.DISABLED_COLOR);
+            button.setStroke(constants.DISABLED_COLOR, 0);
+            button.setOrigin(0.5, -1)
+
+            button.isDisabled = true;
+        }
+
+    }
+    createBuyButton(name) {
+        const clickButton = this.add.text(0, 0, 'BUY', { font: "28px Arial Black"})
+        .setInteractive();
+
+        clickButton.isDisabled = true;
+
+
+        BuyButtons[name] = clickButton;
+
+
+        clickButton.setShadow(2, 2, "#333333", 2, false, true);
+
+        // set the correct colors for the status
+        this.updateBuyButton(name);
+
+        clickButton.setOrigin(0.5, -0.8);
+
+        clickButton.on('pointerdown', () => {
+            if (GameStateManager.canBuyBusiness(name)) {
+                GameStateManager.buyNewBusiness(name);
+            }
+            else {
+                console.log('unable to buy!');
+            }
+        } )
+        clickButton.on('pointerover', () => {
+            if (GameStateManager.canBuyBusiness(name)) {
+                clickButton.setFill(constants.BUY_HOVER_COLOR);
+            }
+            else {
+                clickButton.setStyle({ fill: constants.DISABLED_COLOR});
+            }
+        } )
+        clickButton.on('pointerout', () => {
+
+            if (GameStateManager.canBuyBusiness(name)) {
+                clickButton.setStyle({ fill: constants.BUY_TEXT_COLOR});
+            }
+            else {
+                clickButton.setStyle({ fill: constants.DISABLED_COLOR});
+            }
+        } );
+
+        return clickButton;
     }
 
     createBusinessBuyButton(business, yPos){
@@ -44,29 +137,17 @@ export default class BuyPanel extends Phaser.Scene
         .setInteractive();
         titleText.setOrigin(0.5, 3)
 
+        // price text
+        const priceText = this.createPriceText(name);
+
         // clickable buy button
-        const clickButton = this.add.text(0, 0, 'Buy', { font: "28px Arial Black", fill: '#0f0' })
-        .setInteractive();
-        clickButton.setStroke(0xde77ae, 12);
-        clickButton.strokeThickness = 32;
-        clickButton.setShadow(2, 2, "#333333", 2, false, true);
+        const clickButton = this.createBuyButton(name);
 
-        clickButton.setOrigin(0.5, -1.5)
-
-
-        clickButton.on('pointerdown', () => {
-            console.log('clicked!')
-        } )
-        clickButton.on('pointerover', () => {
-            clickButton.setStyle({ fill: '#ff0'});
-        } )
-        clickButton.on('pointerout', () => {
-            clickButton.setStyle({ fill: '#0f0' });
-        } );
 
         // add everything to the container
         businessButtonContainer.add(businessIcon);
         businessButtonContainer.add(clickButton);
+        businessButtonContainer.add(priceText);
         businessButtonContainer.add(titleText);
 
 
@@ -94,5 +175,10 @@ export default class BuyPanel extends Phaser.Scene
     }
 
     update() {
+        businesses.forEach((business) => {
+            const { name } = business;
+            this.updateBuyButton(name);
+            this.updatePriceText(name);
+        })
     }
 }

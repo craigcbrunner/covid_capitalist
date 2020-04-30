@@ -1,6 +1,8 @@
 import Phaser from 'phaser'
 import constants from '../../utils/constants';
+import GameStateManager from '../../utils/GameStateManager';
 
+let MoneyText;
 export default class Header extends Phaser.Scene
 {
 	constructor()
@@ -24,6 +26,10 @@ export default class Header extends Phaser.Scene
 
     }
 
+    getCurrentMoneyText = () => {
+        return `$${GameStateManager.getMoney()}`;
+    }
+
     create()
     {
         // background overlay
@@ -38,9 +44,16 @@ export default class Header extends Phaser.Scene
 
         this.add.text(constants.GAME_WIDTH - 225,20,"COVID Capitalist", style);
 
-        // // money total 
+        // money total 
         var style = {font: "30px money", fill: constants.MONEY_FONT_COLOR};
+        MoneyText = this.add.text(10,10,this.getCurrentMoneyText(), style);
+        
+        MoneyText.setShadow(2, 2, "#333333", 2, false, true);
 
-        this.add.text(10,10,"$1", style);
+    }
+
+    update() {
+        // update money total
+        MoneyText.setText(this.getCurrentMoneyText());
     }
 }
