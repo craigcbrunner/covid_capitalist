@@ -13,9 +13,10 @@ class GameStateManagerSingleton {
         businessCount = 0;
 
         businesses.forEach((business) => {
-            const { name, basePrice, multiplier, managerPrice } = business;
+            const { name, basePrice, multiplier, managerPrice, buildingImage } = business;
             currentBusinesses[name] = {
                 name,
+                buildingImage,
                 boughtCount: 0, 
                 basePrice, 
                 multiplier,

@@ -6,6 +6,6 @@ export default [
         managerPrice: 1000,
         clickTime: 1,
         image: 'assets/sprites/ppe-mask.png',
-        buildingImage: 'assets/sprites/smalller_building_1.png'
+        buildingImage: 'assets/sprites/smaller_building_1.png'
     }
 ]

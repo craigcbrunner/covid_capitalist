@@ -13,7 +13,8 @@ const Random = Phaser.Math.Between;
 
 const SCROLL_BAR_COLOR = 0x912c2c;
 const SCROLL_BAR_BG_COLOR = 0x808080;
-
+const CELL_WIDTH = 150;
+const CELL_HEIGHT = 150;
 
 let previousBusinessesBuilt = 0;
 
@@ -35,24 +36,52 @@ export default class Main extends Phaser.Scene
         loadFonts(this);
 
         this.load.image('sky', 'assets/backgrounds/sky.png');
+        businesses.forEach((business) => {
+            const { name, image, buildingImage } = business;
+            this.load.image(`${name}-building`, buildingImage);
+
+            this.load.image(`${name}-image`, image);
+        })
     }
 
 
-    setupNewBusiness = (business) => {
-        console.log('setting up new business: ', business);
+    renderBusiness = (cell, cellContainer) => {
+        //console.log('setting up new business: ', business);
+        var scene = cell.scene,
+        width = cell.width,
+        height = cell.height,
+        item = cell.item,
+        index = cell.index;
+
+        const { name, buildingImage, prevPrice, image} = item;
+        if (cellContainer === null) {
+            cellContainer = this.add.container(0, 0);
+            const buildingImage = this.add.image(0, 0, `${name}-building`);
+            buildingImage.setDisplaySize(100, 100);
+            buildingImage.setDisplayOrigin(0, 0);
+            cellContainer.add(buildingImage);
+
+
+            const icon = this.add.image(0, 90, `${name}-image`);
+            icon.setDisplaySize(50, 50);
+            icon.setDisplayOrigin(0, 0);
+            cellContainer.add(icon);
+        }
+
+        // Set properties from item value
+        // cellContainer.setMinSize(width, height); // Size might changed in this demo
+        // cellContainer.getElement('text').setText(item.id); // Set text of text object
+
+        // cellContainer.getElement('icon').setFillStyle(item.color); // Set fill color of round rectangle object
+        return cellContainer;
     }
 
     createAndUpdateBusinesses = () => {
         const currentBusinessesCount = GameStateManager.getCurrentBusinessCount();
         if (currentBusinessesCount > previousBusinessesBuilt) {
             const operatingBusinesses = GameStateManager.getOperatingBusinesses();
-            operatingBusinesses.forEach((business) => {
-                const { name } = business;
-                if (!OperatingBusinesses[name]) {
-                    this.setupNewBusiness(business);
-                }
-            });
-
+            table.setItems(operatingBusinesses);
+            table.layout();
             previousBusinessesBuilt += 1;
         }
     }
@@ -75,7 +104,7 @@ export default class Main extends Phaser.Scene
         var scrollMode = 0; // 0:vertical, 1:horizontal
 
 
-        var gridTable = new GridTable(this, {
+        table = new GridTable(this, {
             x: 450,
             y: 450,
             width: constants.GAME_WIDTH - constants.SIDE_PANEL_WIDTH - 100,
@@ -85,10 +114,10 @@ export default class Main extends Phaser.Scene
 
 
             table: {
-                cellWidth: (scrollMode === 0) ? undefined : 60,
-                cellHeight: (scrollMode === 0) ? 60 : undefined,
+                cellWidth: CELL_WIDTH,
+                cellHeight: CELL_HEIGHT,
 
-                columns: 3,
+                columns: 2,
 
                 mask: {
                     padding: 2,
@@ -111,45 +140,14 @@ export default class Main extends Phaser.Scene
             },
 
             
-            createCellContainerCallback: (cell, cellContainer) => {
-                var scene = cell.scene,
-                    width = cell.width,
-                    height = cell.height,
-                    item = cell.item,
-                    index = cell.index;
-                if (cellContainer === null) {
-                    cellContainer = this.add.existing(new Label(this, {
-                        width: width,
-                        height: height,
-
-                        orientation: scrollMode,
-                        background: this.add.existing(new RoundRectangle(this,  0, 0, 20, 20, 0)),
-                        icon: this.add.existing(new RoundRectangle(this,  0, 0, 20, 20, 10, 0x0)),
-                        text: scene.add.text(0, 0, ''),
-
-                        space: {
-                            icon: 10,
-                            left: (scrollMode === 0) ? 15 : 0,
-                            top: (scrollMode === 0) ? 0 : 15,
-                        }
-                    }));
-                }
-
-                // Set properties from item value
-                cellContainer.setMinSize(width, height); // Size might changed in this demo
-                cellContainer.getElement('text').setText(item.id); // Set text of text object
-
-                cellContainer.getElement('icon').setFillStyle(item.color); // Set fill color of round rectangle object
-                return cellContainer;
-            },
-            items: CreateItems(100)
+            createCellContainerCallback: this.renderBusiness,
         })
             .layout()
         //.drawBounds(this.add.graphics(), 0xff0000);
 
-        this.add.existing(gridTable);
+        this.add.existing(table);
         this.print = this.add.text(0, 0, '');
-        gridTable
+        table
             .on('cell.over', function (cellContainer, cellIndex) {
             }, this)
             .on('cell.out', function (cellContainer, cellIndex) {
