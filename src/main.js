@@ -5,6 +5,7 @@ import Header from './scenes/hud/header';
 import constants from './utils/constants'
 import BuyPanel from './scenes/hud/buy_panel';
 import WebfontLoaderPlugin from 'phaser3-rex-plugins/plugins/webfontloader-plugin.js';
+import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
 
 const config = {
@@ -13,9 +14,8 @@ const config = {
             key: 'rexWebfontLoader',
             plugin: WebfontLoaderPlugin,
             start: true
-        },
+		}],
         // ...
-        ]
     },
 	type: Phaser.AUTO,
 	width: constants.GAME_WIDTH,

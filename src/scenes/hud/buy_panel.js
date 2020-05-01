@@ -8,6 +8,8 @@ import loadFonts from '../../utils/loadFonts';
 const BUTTON_HEIGHT = 120;
 const BUTTON_WIDTH = constants.SIDE_PANEL_WIDTH;
 
+import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
+
 const BuyButtons = {};
 const PriceTexts = {};
 export default class BuyPanel extends Phaser.Scene
