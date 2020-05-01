@@ -7,14 +7,17 @@ import { Viewport, Row } from 'phaser-ui-tools';
 import { GridTable, Sizer } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
 import { Label } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
 import RoundRectangle from 'phaser3-rex-plugins/plugins/roundrectangle.js';
+import { stat } from 'fs';
 
 
 const Random = Phaser.Math.Between;
 
 const SCROLL_BAR_COLOR = 0x912c2c;
 const SCROLL_BAR_BG_COLOR = 0x808080;
-const CELL_WIDTH = 150;
-const CELL_HEIGHT = 150;
+const STATUS_BAR_BORDER_COLOR =  0xFFCC00;
+
+const CELL_WIDTH = 200;
+const CELL_HEIGHT = 200;
 
 let previousBusinessesBuilt = 0;
 
@@ -56,7 +59,7 @@ export default class Main extends Phaser.Scene
         const { name, buildingImage, prevPrice, image} = item;
         if (cellContainer === null) {
             cellContainer = this.add.container(0, 0);
-            const buildingImage = this.add.image(0, 0, `${name}-building`);
+            const buildingImage = this.add.image(35, 0, `${name}-building`);
             buildingImage.setDisplaySize(100, 100);
             buildingImage.setDisplayOrigin(0, 0);
             cellContainer.add(buildingImage);
@@ -66,6 +69,15 @@ export default class Main extends Phaser.Scene
             icon.setDisplaySize(50, 50);
             icon.setDisplayOrigin(0, 0);
             cellContainer.add(icon);
+
+            const statusBar = new RoundRectangle(this, 55, 105, 100, 25, 8, SCROLL_BAR_BG_COLOR)
+            statusBar.setOrigin(0, 0);
+            statusBar.setStrokeStyle(2, STATUS_BAR_BORDER_COLOR);
+            cellContainer.add(statusBar);
+
+            var style = {font: "14px money", fill: constants.MONEY_FONT_COLOR};
+            const priceText = this.add.text(58, 105, `$${prevPrice}`, style);
+            cellContainer.add(priceText);
         }
 
         // Set properties from item value
