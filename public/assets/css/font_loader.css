@@ -1,6 +1,13 @@
 @font-face {
-	font-family: "peace_sans";
+	font-family: "biohazard";
 	font-style: normal;
 	font-weight: 400;
-	src: url("/assets/fonts/biohazard.ttf");
+	src: url("/assets/css/biohazard.ttf");
+}
+
+@font-face {
+	font-family: "money";
+	font-style: normal;
+	font-weight: 400;
+	src: url("/assets/css/bad_guy_black.ttf");
 }

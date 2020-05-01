@@ -1,28 +1,20 @@
 import Phaser from 'phaser'
 import constants from '../../utils/constants';
 import GameStateManager from '../../utils/GameStateManager';
+import loadFonts from '../../utils/loadFonts';
+
 
 let MoneyText;
 export default class Header extends Phaser.Scene
 {
 	constructor()
 	{
-		super({key: 'header', active: true})
+		super({key: 'header', active: false})
 	}
 
 	preload()
     {
         this.load.image('covid', 'assets/sprites/covid.png');
-
-        // hack to force the fonts to load early
-        const styleBio = {font: "1px biohazard", fill: "#000"};
-
-        this.add.text(0,0,"", styleBio);
-
-        const styleMoney = {font: "1px money", fill: "#000"};
-
-        this.add.text(0,0,"", styleMoney);
-
 
     }
 

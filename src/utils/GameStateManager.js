@@ -15,6 +15,7 @@ class GameStateManagerSingleton {
         businesses.forEach((business) => {
             const { name, basePrice, multiplier, managerPrice } = business;
             currentBusinesses[name] = {
+                name,
                 boughtCount: 0, 
                 basePrice, 
                 multiplier,
@@ -46,8 +47,22 @@ class GameStateManagerSingleton {
         currentBusinesses[name].prevPrice = currentPrice;
         currentBusinesses[name].boughtCount += 1;
 
+        businessCount += 1;
+
         return true;
 
+    }
+
+    getCurrentBusinessCount = () => {
+        return businessCount;
+    }
+
+    getOperatingBusinesses = () => {
+        const operatingBusinesses = Object.values(currentBusinesses).filter((business) => {
+            return business.boughtCount > 0;
+        })
+
+        return operatingBusinesses;
     }
 
     canBuyBusiness = (name) => {

@@ -4,6 +4,7 @@ import businesses from '../../data/businesses';
 
 import { Viewport, Column } from 'phaser-ui-tools';
 import GameStateManager from '../../utils/GameStateManager';
+import loadFonts from '../../utils/loadFonts';
 const BUTTON_HEIGHT = 120;
 const BUTTON_WIDTH = constants.SIDE_PANEL_WIDTH;
 
@@ -13,7 +14,7 @@ export default class BuyPanel extends Phaser.Scene
 {
 	constructor()
 	{
-		super({key: 'buy-panel', active: true})
+		super({key: 'buy-panel', active: false})
 	}
 
 	preload()
