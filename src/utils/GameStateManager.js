@@ -1,117 +1,121 @@
 import businesses from '../data/businesses';
 
 let currentMoney;
-const currentBusinesses = {};
+const currentBusinesses = [];
+const businessList = {};
 
 let businessCount;
 
 
-
 class GameStateManagerSingleton {
-    constructor() {
-        currentMoney = 1;
-        businessCount = 0;
+  constructor() {
+    currentMoney = 1;
+    businessCount = 0;
 
-        businesses.forEach((business) => {
-            const { name, basePrice, image, multiplier, managerPrice, buildingImage, clickTime } = business;
-            currentBusinesses[name] = {
-                name,
-                boughtCount: 0, 
-                basePrice,
-                multiplier,
-                managerPrice,
-                prevPrice: 0,
-                hasManager: false,
-                clickTime
-            }
-        })
-    }
+    businesses.forEach((business) => {
+      const {
+        name, basePrice, multiplier, managerPrice, clickTime,
+      } = business;
+      businessList[name] = {
+        name,
+        boughtCount: 0,
+        basePrice,
+        multiplier,
+        managerPrice,
+        prevPrice: 0,
+        hasManager: false,
+        clickTime,
+      };
+    });
+  }
 
-    getMoney = () => {
-        return currentMoney;    
-    }
+    getMoney = () => currentMoney
 
     clickBusiness = (name) => {
-        currentMoney += currentBusinesses[name].prevPrice;
+      currentMoney += businessList[name].prevPrice;
     }
 
     buyNewBusiness = (name) => {
+      if (!this.canBuyBusiness(name)) {
+        return false;
+      }
 
-        if (!this.canBuyBusiness(name)) {
-            return false;
-        }
+      const currentPrice = this.getCurrentBusinessPrice(name);
 
-        const currentPrice = this.getCurrentBusinessPrice(name);
+      currentMoney -= currentPrice;
 
-        currentMoney = currentMoney - currentPrice;
+      businessList[name].prevPrice = currentPrice;
+      businessList[name].boughtCount += 1;
 
-        currentBusinesses[name].prevPrice = currentPrice;
-        currentBusinesses[name].boughtCount += 1;
 
-        businessCount += 1;
+      businessCount += 1;
 
-        return true;
+      const currentBusinessIndex = currentBusinesses.findIndex((business) => business.name === name);
 
+      if (currentBusinessIndex < 0) {
+        currentBusinesses.push(businessList[name]);
+      } else {
+        currentBusinesses[currentBusinessIndex] = businessList[name];
+      }
+
+      return true;
     }
 
     buyNewManager = (name) => {
-        if (!this.canBuyManager(name)) {
-            return false;
-        }
+      if (!this.canBuyManager(name)) {
+        return false;
+      }
 
-        const currentPrice = this.getManagerPrice(name);
+      const currentPrice = this.getManagerPrice(name);
 
-        currentMoney = currentMoney - currentPrice;
+      currentMoney -= currentPrice;
 
-        currentBusinesses[name].hasManager = true;
+      businessList[name].hasManager = true;
 
-        businessCount += 1;
+      businessCount += 1;
 
-        return true;
-    } 
-
-    getManagerPrice = (name) => {
-        return currentBusinesses[name].managerPrice;
+      return true;
     }
 
-    businessHasManager = (name) => {
-        return currentBusinesses[name].hasManager;
-    }
+    getManagerPrice = (name) => businessList[name].managerPrice
 
-    getCurrentBusinessCount = () => {
-        return businessCount;
-    }
+    businessHasManager = (name) => businessList[name].hasManager
+
+    getCurrentBusinessCount = () => businessCount
 
     canBuyManager = (name) => {
-        const managerPrice = this.getManagerPrice(name);
-        if (currentMoney < managerPrice) {
-            return false;
-        }
+      const business = businessList[name];
 
-        return true;
+      // can't buy manager if you don't own the business
+      if (business.boughtCount <= 0) {
+        return false;
+      }
+      const managerPrice = this.getManagerPrice(name);
+      if (currentMoney < managerPrice) {
+        return false;
+      }
+
+      return true;
     }
 
-    getOperatingBusinesses = () => {
-        const operatingBusinesses = Object.values(currentBusinesses).filter((business) => {
-            return business.boughtCount > 0;
-        })
-
-        return operatingBusinesses;
-    }
+    getOperatingBusinesses = () => currentBusinesses
 
     canBuyBusiness = (name) => {
-        const currentPrice = this.getCurrentBusinessPrice(name);
-        if (currentMoney < currentPrice) {
-            return false;
-        }
+      const currentPrice = this.getCurrentBusinessPrice(name);
+      if (currentMoney < currentPrice) {
+        return false;
+      }
 
-        return true;
+      return true;
     }
 
     getCurrentBusinessPrice = (name) => {
-        const {boughtCount, basePrice, multiplier, prevPrice} = currentBusinesses[name];
-        let currentBoughtCount = boughtCount <= 0 ? 1 : boughtCount;
-        return (currentBoughtCount * basePrice * multiplier) + prevPrice;
+      const {
+        boughtCount, basePrice, multiplier, prevPrice,
+      } = businessList[name];
+      const currentBoughtCount = boughtCount <= 0 ? 1 : boughtCount;
+      const currMultiplier = boughtCount <= 0 ? 1 : multiplier;
+      return Math.floor((currentBoughtCount * basePrice * currMultiplier) + prevPrice);
     }
 }
 

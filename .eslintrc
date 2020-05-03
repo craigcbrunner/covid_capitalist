@@ -1,0 +1,9 @@
+{
+    "parser": "babel-eslint",
+    "extends": ["eslint:recommended", "airbnb", "airbnb/hooks"],
+    "env": {
+      "browser": true,
+      "jest": true,
+      "es6": true
+    }
+  }

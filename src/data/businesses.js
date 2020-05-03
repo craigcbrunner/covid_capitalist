@@ -1,12 +1,65 @@
 export default [
-    {
-        name: 'PPE Manufacturer',
-        managerName: 'PPE Manager',
-        basePrice: 1,
-        multiplier: 1,
-        managerPrice: 2,
-        clickTime: 0.5,
-        image: 'assets/sprites/ppe-mask.png',
-        buildingImage: 'assets/sprites/smaller_building_1.png'
-    }
+  {
+    name: 'PPE Manufacturer',
+    managerName: 'PPE Manager',
+    basePrice: 1,
+    multiplier: 1,
+    managerPrice: 10000,
+    clickTime: 0.5,
+    image: 'assets/sprites/ppe-mask.png',
+    buildingImage: 'assets/sprites/smaller_building_1.png',
+  },
+  {
+    name: 'Test Kit Producer',
+    managerName: 'Test Kit Manager',
+    basePrice: 5000,
+    multiplier: 1.5,
+    managerPrice: 50000,
+    clickTime: 5,
+    image: 'assets/sprites/test_tubes.png',
+    buildingImage: 'assets/sprites/medium_building_1.png',
+  },
+
+  {
+    name: 'Ventilator Factory',
+    managerName: 'Ventilator Manager',
+    multiplier: 2.5,
+    managerPrice: 250000,
+    basePrice: 50000,
+    clickTime: 10,
+    image: 'assets/sprites/ventilator.png',
+    buildingImage: 'assets/sprites/smaller_building_4.png',
+  },
+
+  {
+    name: 'Treatment Factory',
+    managerName: 'Treatment Manager',
+    multiplier: 3.5,
+    managerPrice: 1000000,
+    basePrice: 500000,
+    clickTime: 20,
+    image: 'assets/sprites/pills.png',
+    buildingImage: 'assets/sprites/medium_building_2.png',
+  },
+  {
+    name: 'Stem Cell Research',
+    managerName: 'Stem Cell Manager',
+    multiplier: 5,
+    managerPrice: 20000000,
+    basePrice: 1500000,
+    clickTime: 30,
+    image: 'assets/sprites/pietre-dish.png',
+    buildingImage: 'assets/sprites/bigger_building_1.png',
+  },
+  {
+    name: 'Vaccine Producer',
+    managerName: 'Vaccine Manager',
+    multiplier: 10,
+    managerPrice: 1000000000,
+    basePrice: 150000000,
+    clickTime: 45,
+    image: 'assets/sprites/syringe.png',
+    buildingImage: 'assets/sprites/biggest_building_1.png',
+  },
 ]
+;
