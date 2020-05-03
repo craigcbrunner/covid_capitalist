@@ -12,7 +12,7 @@ import { stat } from 'fs';
 
 const Random = Phaser.Math.Between;
 
-const SCROLL_BAR_COLOR = 0x912c2c;
+const SCROLL_BAR_COLOR = 0xFFCC00;
 const SCROLL_BAR_BG_COLOR = 0x808080;
 const STATUS_BAR_BORDER_COLOR =  0xFFCC00;
 
@@ -23,7 +23,9 @@ let previousBusinessesBuilt = 0;
 
 let table;
 
-const OperatingBusinesses = {};
+const ClickedBusinesses = {};
+
+const StatusBars = {};
 
 export default class Main extends Phaser.Scene
 {
@@ -45,8 +47,58 @@ export default class Main extends Phaser.Scene
 
             this.load.image(`${name}-image`, image);
         })
+    }  
+
+    clickCompleted = (name) => {
+        GameStateManager.clickBusiness(name);
+        delete ClickedBusinesses[name];
+        this.updateProgressBar(name, 0);
+
     }
 
+    clickBusiness = (name, clickTime) => {
+        // check if we are in progress on a click
+        if (ClickedBusinesses[name] && ClickedBusinesses[name].timer && ClickedBusinesses[name].timer.getOverallProgress() < 1) {
+            return;
+        }
+
+        // remove old timer on new create...
+        if (ClickedBusinesses[name] && ClickedBusinesses[name].timer) {
+            ClickedBusinesses[name].timer.destroy();
+        }
+
+        // create a new timer based on click time...
+        const delay = clickTime * 1000;
+        const timer = this.time.addEvent({ 
+            delay, 
+            repeat: 0,
+            callbackScope: this,
+            callback: () => {
+                this.clickCompleted(name);
+            },
+        });
+
+        ClickedBusinesses[name] = {
+            timer,
+        }
+    }
+
+    updateProgressBar = (name, progress) => {
+        const currStatusBar = StatusBars[name];
+        
+        // update the bar size...
+        currStatusBar.setDisplaySize(100 * progress, 24);
+        currStatusBar.setSize(100 * progress, 24);
+    }
+
+    updateClicks = () => {
+        Object.keys(ClickedBusinesses).forEach((name) => {
+            const currStatusBar = StatusBars[name];
+            let currentProgress = ClickedBusinesses[name].timer.getOverallProgress();
+            
+            this.updateProgressBar(name, currentProgress);
+        })
+    }
 
     renderBusiness = (cell, cellContainer) => {
         //console.log('setting up new business: ', business);
@@ -56,7 +108,7 @@ export default class Main extends Phaser.Scene
         item = cell.item,
         index = cell.index;
 
-        const { name, buildingImage, prevPrice, image} = item;
+        const { name, buildingImage, prevPrice, image, clickTime} = item;
         if (cellContainer === null) {
             cellContainer = this.add.container(0, 0);
             const buildingImage = this.add.image(35, 0, `${name}-building`);
@@ -70,21 +122,41 @@ export default class Main extends Phaser.Scene
             icon.setDisplayOrigin(0, 0);
             cellContainer.add(icon);
 
-            const statusBar = new RoundRectangle(this, 55, 105, 100, 25, 8, SCROLL_BAR_BG_COLOR)
+            // const statusBarOverlay = new RoundRectangle(this, 55, 105, 100, 25, 2, constants.SCROLL_BAR_COLOR)
+            // statusBarOverlay.setOrigin(0, 0);
+            // cellContainer.add(statusBarOverlay);
+
+            const statusBar = new RoundRectangle(this, 55, 105, 100, 25, 2, SCROLL_BAR_BG_COLOR)
             statusBar.setOrigin(0, 0);
             statusBar.setStrokeStyle(2, STATUS_BAR_BORDER_COLOR);
             cellContainer.add(statusBar);
 
+            const statusBarOverlay = new RoundRectangle(this, 55, 105, 0, 24, 0, SCROLL_BAR_COLOR)
+            statusBarOverlay.setOrigin(0, 0);
+            cellContainer.add(statusBarOverlay);
+
+            StatusBars[name] = statusBarOverlay;
+
+
+
+
             var style = {font: "14px money", fill: constants.MONEY_FONT_COLOR};
             const priceText = this.add.text(58, 105, `$${prevPrice}`, style);
+            priceText.setName('price-text');
             cellContainer.add(priceText);
+
+            cellContainer.setSize(CELL_HEIGHT, CELL_WIDTH);
+            cellContainer.setInteractive();
+            
+
+
+             cellContainer.on('pointerdown', () => {
+                this.clickBusiness(name, clickTime);
+            })
         }
 
-        // Set properties from item value
-        // cellContainer.setMinSize(width, height); // Size might changed in this demo
-        // cellContainer.getElement('text').setText(item.id); // Set text of text object
+        cellContainer.getByName('price-text').setText(`$${prevPrice}`);
 
-        // cellContainer.getElement('icon').setFillStyle(item.color); // Set fill color of round rectangle object
         return cellContainer;
     }
 
@@ -158,12 +230,7 @@ export default class Main extends Phaser.Scene
         //.drawBounds(this.add.graphics(), 0xff0000);
 
         this.add.existing(table);
-        this.print = this.add.text(0, 0, '');
-        table
-            .on('cell.over', function (cellContainer, cellIndex) {
-            }, this)
-            .on('cell.out', function (cellContainer, cellIndex) {
-            }, this)
+
 
   
       
@@ -189,5 +256,6 @@ export default class Main extends Phaser.Scene
 
     update() {
         this.createAndUpdateBusinesses();
+        this.updateClicks();
     }
 }
