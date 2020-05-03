@@ -10,6 +10,7 @@ export default {
     BUY_STROKE_COLOR: "#e0c56e",
     BUY_HOVER_COLOR: "#ff0",
     TEXT_SHADOW_COLOR: "#333333",
-    DISABLED_COLOR: "#ABABAB"
+    DISABLED_COLOR: "#ABABAB",
+    MANAGER_SPRITE: 'assets/sprites/manager.png'
 
 };

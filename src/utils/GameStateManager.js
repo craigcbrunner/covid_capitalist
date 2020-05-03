@@ -21,7 +21,7 @@ class GameStateManagerSingleton {
                 multiplier,
                 managerPrice,
                 prevPrice: 0,
-                managers: 0,
+                hasManager: false,
                 clickTime
             }
         })
@@ -54,8 +54,41 @@ class GameStateManagerSingleton {
 
     }
 
+    buyNewManager = (name) => {
+        if (!this.canBuyManager(name)) {
+            return false;
+        }
+
+        const currentPrice = this.getManagerPrice(name);
+
+        currentMoney = currentMoney - currentPrice;
+
+        currentBusinesses[name].hasManager = true;
+
+        businessCount += 1;
+
+        return true;
+    } 
+
+    getManagerPrice = (name) => {
+        return currentBusinesses[name].managerPrice;
+    }
+
+    businessHasManager = (name) => {
+        return currentBusinesses[name].hasManager;
+    }
+
     getCurrentBusinessCount = () => {
         return businessCount;
+    }
+
+    canBuyManager = (name) => {
+        const managerPrice = this.getManagerPrice(name);
+        if (currentMoney < managerPrice) {
+            return false;
+        }
+
+        return true;
     }
 
     getOperatingBusinesses = () => {

@@ -47,6 +47,8 @@ export default class Main extends Phaser.Scene
 
             this.load.image(`${name}-image`, image);
         })
+
+        this.load.image('manager', constants.MANAGER_SPRITE);
     }  
 
     clickCompleted = (name) => {
@@ -56,8 +58,12 @@ export default class Main extends Phaser.Scene
 
     }
 
-    clickBusiness = (name, clickTime) => {
+    clickBusiness = (name, clickTime, managerClick) => {
         // check if we are in progress on a click
+        if (GameStateManager.businessHasManager(name) && !managerClick) {
+            return;
+        }
+
         if (ClickedBusinesses[name] && ClickedBusinesses[name].timer && ClickedBusinesses[name].timer.getOverallProgress() < 1) {
             return;
         }
@@ -108,7 +114,7 @@ export default class Main extends Phaser.Scene
         item = cell.item,
         index = cell.index;
 
-        const { name, buildingImage, prevPrice, image, clickTime} = item;
+        const { name, buildingImage, prevPrice, image, clickTime, hasManager} = item;
         if (cellContainer === null) {
             cellContainer = this.add.container(0, 0);
             const buildingImage = this.add.image(35, 0, `${name}-building`);
@@ -116,22 +122,28 @@ export default class Main extends Phaser.Scene
             buildingImage.setDisplayOrigin(0, 0);
             cellContainer.add(buildingImage);
 
+            const managerIcon = this.add.image(150, 100, 'manager');
+            managerIcon.setName('manager-icon')
+            managerIcon.setDisplaySize(30, 30);
+            managerIcon.setDisplayOrigin(0.5);
+            cellContainer.add(managerIcon);
+
+            if (!hasManager) {
+                managerIcon.setVisible(false);
+            }
+
 
             const icon = this.add.image(0, 90, `${name}-image`);
             icon.setDisplaySize(50, 50);
             icon.setDisplayOrigin(0, 0);
             cellContainer.add(icon);
 
-            // const statusBarOverlay = new RoundRectangle(this, 55, 105, 100, 25, 2, constants.SCROLL_BAR_COLOR)
-            // statusBarOverlay.setOrigin(0, 0);
-            // cellContainer.add(statusBarOverlay);
-
             const statusBar = new RoundRectangle(this, 55, 105, 100, 25, 2, SCROLL_BAR_BG_COLOR)
             statusBar.setOrigin(0, 0);
             statusBar.setStrokeStyle(2, STATUS_BAR_BORDER_COLOR);
             cellContainer.add(statusBar);
 
-            const statusBarOverlay = new RoundRectangle(this, 55, 105, 0, 24, 0, SCROLL_BAR_COLOR)
+            const statusBarOverlay = new RoundRectangle(this, 55, 105, 0, 24, 0, SCROLL_BAR_COLOR, 0.6)
             statusBarOverlay.setOrigin(0, 0);
             cellContainer.add(statusBarOverlay);
 
@@ -157,9 +169,22 @@ export default class Main extends Phaser.Scene
 
         cellContainer.getByName('price-text').setText(`$${prevPrice}`);
 
+        if (hasManager) {
+            cellContainer.getByName('manager-icon').setVisible(true);
+        }
+
         return cellContainer;
     }
 
+    runManagers = () => {
+        const operatingBusinesses = GameStateManager.getOperatingBusinesses();
+        operatingBusinesses.forEach((business) => {
+            const { hasManager, clickTime, name } = business;
+            if (hasManager) {
+                this.clickBusiness(name, clickTime, true);
+            }
+        });
+    }
     createAndUpdateBusinesses = () => {
         const currentBusinessesCount = GameStateManager.getCurrentBusinessCount();
         if (currentBusinessesCount > previousBusinessesBuilt) {
@@ -210,10 +235,10 @@ export default class Main extends Phaser.Scene
                 reuseCellContainer: true,
             },
 
-            slider: {
-                track: this.add.existing(new RoundRectangle(this, 0, 0, 20, 10, 10, SCROLL_BAR_BG_COLOR)),
-                thumb: this.add.existing(new RoundRectangle(this, 0, 0, 0, 0, 13, SCROLL_BAR_COLOR)),
-            },
+            // slider: {
+            //     track: this.add.existing(new RoundRectangle(this, 0, 0, 20, 10, 10, SCROLL_BAR_BG_COLOR)),
+            //     thumb: this.add.existing(new RoundRectangle(this, 0, 0, 0, 0, 13, SCROLL_BAR_COLOR)),
+            // },
 
 
             space: {
@@ -256,6 +281,7 @@ export default class Main extends Phaser.Scene
 
     update() {
         this.createAndUpdateBusinesses();
+        this.runManagers();
         this.updateClicks();
     }
 }
