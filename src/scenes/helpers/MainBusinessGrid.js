@@ -207,11 +207,14 @@ class MainBusinessGrid {
     // create or update the currently purchased businesses
     createAndUpdateBusinesses = () => {
       const currentBusinessesCount = GameStateManager.getCurrentBusinessCount();
-      if (currentBusinessesCount > previousBusinessesBuilt || previousInfections !== GameStateManager.getInfectedCount()) {
+      const currentInfections = GameStateManager.getInfectedCount();
+
+      if (currentBusinessesCount > previousBusinessesBuilt || previousInfections !== currentInfections) {
         const operatingBusinesses = GameStateManager.getOperatingBusinesses();
         table.setItems(operatingBusinesses);
         table.layout();
-        previousBusinessesBuilt += 1;
+        previousBusinessesBuilt = currentBusinessesCount;
+        previousInfections = currentInfections;
 
         // add colliders on top of the buildings, 
         // because the container colliders and sprite
@@ -223,7 +226,6 @@ class MainBusinessGrid {
           this.buildingsGroup.add(currCollider);
         });
 
-        previousInfections = GameStateManager.getInfectedCount();
       }
     }
 

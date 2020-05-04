@@ -7,7 +7,7 @@ const infectedList = {};
 
 let businessCount;
 
-let infectedCount;
+let infectedCount = 0;
 
 const AUTO_SAVE_INTERVAL = 10000;
 const LOCAL_STORAGE_NAME = 'COVID_CAPITALIST_GAME_SAVE';
