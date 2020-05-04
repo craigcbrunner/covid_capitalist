@@ -1,7 +1,11 @@
 # Covid Capitalist!
 
+![Covid Capitalist Main Screen](https://craigcbrunner.github.io/covid_capitalist/docs/images/covid_main_screen.png)
+
+### Demo
+Try the demo here -> https://craigcbrunner.github.io/covid_capitalist/demo/
 ### Description
-A short cookie clicker game, with a viral theme, by Craig Brunner, build on phaser.js.
+A short cookie clicker game, with a viral theme, by Craig Brunner, build on phaser.js. Be careful to click away the floating covids so your businesses don't get infected and shut down!
 
 This was just an experiment for me to learn more about game development in PhaserJS, and also test out Parcel.
 
@@ -63,6 +67,14 @@ This basically creates the single column grid on the side of the businesses and 
 
 This is the grid of the businesses that can be clicked, also shows the manager and a progress of the clicks. It is also updated through the Phaser GridTable and interacting with the GameStateManager.
 
+### GameStateManager
+
+Singleton used by multiple scenes to store and provide functions for accessing state, also handles auto saving and loading. Keeps track of how many businesses bought, managers bought, current money, and infections on businesses.
+
+### Covid Handler 
+
+Simple class that spawns covid viruses that collide with buildings and infect them.
+
 ### businesses.json
 
 This is the datamodel I came up with for businesses, all businesses are loaded from this file:
@@ -106,6 +118,7 @@ Here is an example:
 * In game tutorial
 * Music, sound effects, animation
 * Performance fixes, less re-renders of buy panel and main grid
+* Cooler virus clicking animations and sounds
 
 
 

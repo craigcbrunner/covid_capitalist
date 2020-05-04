@@ -5,8 +5,7 @@
 	"scripts": {
 		"start": "parcel src/index.html -p 8000",
 		"build": "parcel build src/index.html --out-dir dist",
-		"build-demo": "parcel build src/index.html --out-dir ./demo",
-
+		"build-demo": "parcel build src/index.html --out-dir ./demo --public-url https://craigcbrunner.github.io/covid_capitalist/demo/",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"author": "supertommy",
