@@ -18,6 +18,7 @@ export default class BuyPanel extends Phaser.Scene {
     super({ key: 'buy-panel', active: false });
   }
 
+  // load the manager icon and all of the icons for the businesses
   preload() {
     businesses.forEach((business) => {
       const { name, image } = business;
@@ -27,6 +28,7 @@ export default class BuyPanel extends Phaser.Scene {
     this.load.image('manager', constants.MANAGER_SPRITE);
   }
 
+    // set the new price of available things to buy, for updates after first render
     updatePriceText = (name, text, isManager) => {
       if (isManager) {
         text.setText(`$${GameStateManager.getManagerPrice(name)}`);
@@ -35,6 +37,7 @@ export default class BuyPanel extends Phaser.Scene {
       }
     }
 
+    // set up the price for the first render
     createPriceText(name, isManager) {
       const style = { font: '18px money', align: 'center', fill: constants.MONEY_FONT_COLOR };
       const priceText = this.add.text(BUTTON_WIDTH / 2, 75, 'N/A', style);
@@ -48,12 +51,14 @@ export default class BuyPanel extends Phaser.Scene {
       return priceText;
     }
 
+    // update buy button to see if it is able to be clicked or not, after first render
     updateBuyButton = (name, button, isManager) => {
       const canBuy = ((isManager && GameStateManager.canBuyManager(name))
             || (!isManager && GameStateManager.canBuyBusiness(name)));
 
       if (canBuy) {
         this.setBuyFunction(button, isManager, name);
+        // switch color if user is hovering over it
         if (button.isHovered) {
           button.setFill(constants.BUY_HOVER_COLOR);
         } else {
@@ -61,11 +66,16 @@ export default class BuyPanel extends Phaser.Scene {
         }
         button.setStroke(constants.BUY_STROKE_COLOR, 6);
       } else if (!canBuy) {
+        // can't buy with current money, set the button disabled
         button.setFill(constants.DISABLED_COLOR);
         button.setStroke(constants.DISABLED_COLOR, 0);
       }
     }
 
+    // create the on click function and remove the ones from previous renders
+    // I think there is a better way to handle this and optimize this, but due to time
+    // I am leaving it as is, ideally I would only set this when the cell is reused...
+    // but grid table seems to update in ways I don't fully understand
     setBuyFunction = (clickButton, isManager, name) => {
       clickButton.off('pointerup');
 
@@ -74,6 +84,8 @@ export default class BuyPanel extends Phaser.Scene {
           if (GameStateManager.canBuyManager(name)) {
             GameStateManager.buyNewManager(name);
 
+            // if they bought a manager, they should only be able to once
+            // it will be removed from available items so we rerender the items in the grid
             buyGrid.setItems(this.getItems());
           }
         } else if (GameStateManager.canBuyBusiness(name)) {
@@ -82,6 +94,7 @@ export default class BuyPanel extends Phaser.Scene {
       });
     }
 
+    // create the clickable buy text on first render
     createBuyButton = (name, isManager) => {
       const clickButton = this.add.text(BUTTON_WIDTH / 2, 105, 'BUY', { font: '28px Arial Black' })
         .setInteractive();
@@ -97,6 +110,7 @@ export default class BuyPanel extends Phaser.Scene {
 
       this.setBuyFunction(clickButton, isManager, name);
 
+      // set up hover events for highlight text...
       clickButton.on('pointerover', () => {
         clickButton.isHovered = true;
 
@@ -107,6 +121,7 @@ export default class BuyPanel extends Phaser.Scene {
           clickButton.setStyle({ fill: constants.DISABLED_COLOR });
         }
       });
+
       clickButton.on('pointerout', () => {
         clickButton.isHovered = false;
 
@@ -121,6 +136,7 @@ export default class BuyPanel extends Phaser.Scene {
       return clickButton;
     }
 
+    // set up the entire full buy button, icon/clickable buy text, price
     createBusinessBuyButton(business, title, spriteName) {
       const { name, isManager } = business;
 
@@ -169,6 +185,7 @@ export default class BuyPanel extends Phaser.Scene {
       return businessButtonContainer;
     }
 
+    // grid cell rendering function for the table grid
     renderBuyCell = (cell, cellContainer) => {
       const { item } = cell;
 
@@ -177,9 +194,12 @@ export default class BuyPanel extends Phaser.Scene {
       const spriteName = isManager ? 'manager' : `${name}_image`;
 
       if (cellContainer === null) {
+        // first render, create the entire button
         cellContainer = this.createBusinessBuyButton(item, title, spriteName);
       }
 
+      // on later renders just update the price,
+      // i'd like to understand how to better optimize this
       const priceText = cellContainer.getByName('price-text');
       const titleText = cellContainer.getByName('title');
       const businessIcon = cellContainer.getByName('business-icon');
@@ -197,6 +217,7 @@ export default class BuyPanel extends Phaser.Scene {
       return cellContainer;
     }
 
+    // get the current businesses and create a manager button if one doesn't exit
     getItems = () => {
       const currentItems = [];
 
@@ -215,6 +236,8 @@ export default class BuyPanel extends Phaser.Scene {
       return currentItems;
     }
 
+    // create the container grid for the sidebar
+    // single column
     createGrid = () => {
       buyGrid = new GridTable(this, {
         x: 0,
@@ -275,6 +298,7 @@ export default class BuyPanel extends Phaser.Scene {
       this.createGrid();
     }
 
+    // refresh the grid on update so the buttons change when money changes
     update() {
       buyGrid.refresh();
     }

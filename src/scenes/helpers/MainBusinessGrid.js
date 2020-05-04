@@ -19,17 +19,22 @@ const ClickedBusinesses = {};
 
 const StatusBars = {};
 
+// this is the main business grid with all of the clickable businesses
 class MainBusinessGrid {
   constructor(scene) {
     this.scene = scene;
   }
 
+    // call back when the full click time completes
+    // resets the progressbar and gives the cash from the game state manager
     clickCompleted = (name) => {
       GameStateManager.clickBusiness(name);
       delete ClickedBusinesses[name];
       this.updateProgressBar(name, 0);
     }
 
+    // initial click, starts the timer to complete the click
+    // if a click is in progress, discard it
     clickBusiness = (name, clickTime, managerClick) => {
       // check if we are in progress on a click
       if (GameStateManager.businessHasManager(name) && !managerClick) {
@@ -61,6 +66,7 @@ class MainBusinessGrid {
       };
     }
 
+    // update the progress bar of teh click animation
     updateProgressBar = (name, progress) => {
       const currStatusBar = StatusBars[name];
 
@@ -69,6 +75,7 @@ class MainBusinessGrid {
       currStatusBar.setSize(100 * progress, 24);
     }
 
+    // go through all the currently running clicks and update their progress bars
     updateClicks = () => {
       Object.keys(ClickedBusinesses).forEach((name) => {
         const currentProgress = ClickedBusinesses[name].timer.getOverallProgress();
@@ -77,6 +84,8 @@ class MainBusinessGrid {
       });
     }
 
+    // render the full business cell
+    // building, icon, progress bar, price
     renderBusiness = (cell, cellContainer) => {
       const { item } = cell;
 
@@ -101,12 +110,6 @@ class MainBusinessGrid {
           managerIcon.setVisible(false);
         }
 
-
-        // const background = new RoundRectangle(this.scene, 0, 0, CELL_WIDTH, CELL_HEIGHT, 2, SCROLL_BAR_BG_COLOR);
-        // background.setOrigin(0, 0);
-        // background.setStrokeStyle(2, STATUS_BAR_BORDER_COLOR);
-        // cellContainer.add(background);
-
         const icon = this.scene.add.sprite(0, 90, `${name}-image`);
         icon.setDisplaySize(50, 50);
         icon.setDisplayOrigin(0, 0);
@@ -123,20 +126,17 @@ class MainBusinessGrid {
 
         StatusBars[name] = statusBarOverlay;
 
-
-        const style = { font: '14px money', fill: constants.MONEY_FONT_COLOR };
-        const priceText = this.scene.add.text(58, 105, `$${prevPrice}`, style);
+        const style = { font: '8px money', fill: constants.MONEY_FONT_COLOR };
+        const priceText = this.scene.add.text(58, 110, `$${prevPrice}`, style);
         priceText.setName('price-text');
         cellContainer.add(priceText);
 
-
-        // cellContainer.setDisplaySize(CELL_WIDTH, CELL_HEIGHT);
-        // cellContainer.setSize(CELL_WIDTH, CELL_HEIGHT);
-        //cellContainer.setInteractive();
         icon.setInteractive();
         statusBar.setInteractive();
         buildingImage.setInteractive();
 
+        // give click events to all the individual elements
+        // of the business, to count them as clicks
         icon.on('pointerdown', () => {
           this.clickBusiness(name, clickTime);
         });
@@ -148,8 +148,10 @@ class MainBusinessGrid {
         });
       }
 
+      // update new price
       cellContainer.getByName('price-text').setText(`$${prevPrice}`);
 
+      // put the manager icon there if there is a manager on the business
       if (hasManager) {
         cellContainer.getByName('manager-icon').setVisible(true);
       }
@@ -157,6 +159,7 @@ class MainBusinessGrid {
       return cellContainer;
     }
 
+    // run all the currently bought managers to automate clicks
     runManagers = () => {
       const operatingBusinesses = GameStateManager.getOperatingBusinesses();
       operatingBusinesses.forEach((business) => {
@@ -167,6 +170,7 @@ class MainBusinessGrid {
       });
     }
 
+    // create or update the currently purchased businesses
     createAndUpdateBusinesses = () => {
       const currentBusinessesCount = GameStateManager.getCurrentBusinessCount();
       if (currentBusinessesCount > previousBusinessesBuilt) {
@@ -177,6 +181,7 @@ class MainBusinessGrid {
       }
     }
 
+    // create the business grid
     createGrid = () => {
       table = new GridTable(this.scene, {
         x: constants.SIDE_PANEL_WIDTH + 10,
@@ -195,12 +200,6 @@ class MainBusinessGrid {
 
           reuseCellContainer: true,
         },
-
-        // slider: {
-        //     track: this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 20, 10, 10, SCROLL_BAR_BG_COLOR)),
-        //     thumb: this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 13, SCROLL_BAR_COLOR)),
-        // },
-
 
         space: {
           left: 20,

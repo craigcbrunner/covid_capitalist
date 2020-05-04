@@ -10,6 +10,7 @@ export default class Header extends Phaser.Scene {
   }
 
   preload() {
+    // load the covid icon for the logo
     this.load.image('covid', 'assets/sprites/covid.png');
   }
 

@@ -1,3 +1,4 @@
+// helper tool to load the webfonts we use
 export default function (scene) {
   const config = {
     custom: {

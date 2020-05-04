@@ -15,7 +15,9 @@ export default class Main extends Phaser.Scene {
     // use plugin to preload the fonts...
     loadFonts(this);
 
+    // load assets like the background, icons, and buildings
     this.load.image('sky', 'assets/backgrounds/sky.png');
+
     businesses.forEach((business) => {
       const { name, image, buildingImage } = business;
       this.load.image(`${name}-building`, buildingImage);
@@ -37,12 +39,15 @@ export default class Main extends Phaser.Scene {
     skyBackground.tileScaleY = 3;
     skyBackground.tileScaleX = 3;
 
+    // create teh main grid which holds the businesses
     this.busGrid.createGrid();
 
+    // create current businesses
     this.busGrid.createAndUpdateBusinesses();
   }
 
   update() {
+    // update all the businesses, and run the managers, and update the click progress bars
     this.busGrid.createAndUpdateBusinesses();
     this.busGrid.runManagers();
     this.busGrid.updateClicks();

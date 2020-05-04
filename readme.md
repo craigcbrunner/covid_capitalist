@@ -1,203 +1,102 @@
-![phaser3-parceljs-template](https://user-images.githubusercontent.com/2236153/71606463-37a0da80-2b2e-11ea-9b5f-5d26ccc84f91.png)
+# Covid Capitalist!
 
-# Phaser3 + Parcel Template
-> For people who want to spend time making games instead of configuring build tools.
+### Description
+A short cookie clicker game, with a viral theme, by Craig Brunner, build on phaser.js.
 
-![License](https://img.shields.io/badge/license-MIT-green)
+This was just an experiment for me to learn more about game development in PhaserJS, and also test out Parcel.
 
-## Prerequisites
+This game is fully client side and doesn't have any serverside portion at the moment.
 
-You'll need [Node.js](https://nodejs.org/en/), [npm](https://www.npmjs.com/), and [Parcel](https://parceljs.org/) installed.
+### Usage
+Check out the repository and run:
 
-It is highly recommended to use [Node Version Manager](https://github.com/nvm-sh/nvm) (nvm) to install Node.js and npm.
+``` npm install ```
 
-For Windows users there is [Node Version Manager for Windows](https://github.com/coreybutler/nvm-windows).
+To run the game locally use
 
-Install Node.js and `npm` with `nvm`:
+``` npm run start```
 
-```bash
-nvm install node
+To build the distribution folder for serving off your server, run:
 
-nvm use node
-```
+``` npm run dist```
 
-Replace 'node' with 'latest' for `nvm-windows`.
+# Architecture
 
-Then install Parcel:
+### Why I chose Phaser JS
 
-```bash
-npm install -g parcel-bundler
-```
+I have been wanting to learn Phaser for a while. It is based on JS and doesn't require you to write in a different language that is compiled down, and it seems well optimized for performance including a webGL renderer. It has a lot of built in classes and plugins which eases 2D game development, so it seemed like a good starting base for this project.
 
-## Getting Started
+On top of Phaser I used Parcel JS, which is a nice build / project management system for JS. I liked parcel after using it, it seems similar to other build packaging systems(like create-react-app), uses all the stuff you would expect internally like babel and eslint. It keeps your directory structure very light, which I like, and the local web server was very fast in my experience using it. The hot reload was near instantaneous which made development nice.
 
-Clone this repository to your local machine:
+### What I would change
 
-```bash
-git clone https://github.com/ourcade/phaser3-parcel-template.git
-```
+While I liked PhaserJS, and would use it again. I made the mistake of writing my overlayed HUD UI's in Phaser, initially using `phaser-ui-tools`
 
-This will create a folder named `phaser3-parcel-template`. You can specify a different folder name like this:
+`phaser-ui-tools` turned out to be pretty buggy, and unintuitiveto use. I ended up switching to `phaser grid table` from the `rex UI` phaser plugins. This what much more intuitive to use and better documented.
 
-```bash
-git clone https://github.com/ourcade/phaser3-parcel-template.git my-folder-name
-```
+That being said, if I was to start again I would use typical DOM elements overlaying the canvas, with something like React for the menus and HUD overlay. I probably would have built the projectin half the time if I did that from the start. Partly due to being more familiar with it, but also partly due to css just being easier to lay out and more capable than the grid system in `Rex UI`.
 
-Go into your new project folder and install dependencies:
+### What I didn't like
 
-```bash
-cd phaser3-parcel-template # or 'my-folder-name'
-npm install
-```
+Phaser is a nice framework once you learn it, but the documentation could use some work. There seemed to be major changes between Phaser 2 and Phaser 3, and most of the examples online are from Phaser 2, and syntax changed in many cases. This meant sometimes it was a bit of a goose chase to figure out how to do something complex in Phaser 3. But once I learned it the framework was pretty intuitive. 
 
-Start development server:
 
-```
-npm run start
-```
+### Project Architecture
 
-To create a production build:
+The project architecture I created is as follows:
 
-```
-npm run build
-```
+A single scene, with a `header`, and `buy panel` overlayed on it, with the underlying scene being the `main business grid`.
 
-Production files will be placed in the `dist` folder. Then upload those files to a web server. 🎉
+I created a `GameStateManager` singleton which was responsible for keeping all of the game state, this singleton saved a copy of the game state to localStorage every few seconds(currently set to 10s), so that it could be persisted after page reload.
 
-## Project Structure
+The game statemanager has functions which could be called by the various scenes. I think this worked fine for the limited purposes of this game. On a more complicated project I would like to look into a more robust state management solution.
 
-```
-    .
-    ├── dist
-    ├── node_modules
-    ├── public
-    ├── src
-    │   ├── scenes
-    │   │   ├── HelloWorldScene.js
-    │   ├── index.html
-    │   ├── main.js
-    ├── package.json
-```
+### Header
 
-The contents of this template is the basic [Phaser3 getting started example](http://phaser.io/tutorials/getting-started-phaser3/part5).
+The header basically is a small scene that displays the money and the logo...
 
-This template assumes you will want to organize your code into multiple files and use modern JavaScript (or TypeScript).
+### Buy Panel
 
-JavaScript files are intended for the `src` folder. `main.js` is the entry point referenced by `index.html`.
+This basically creates the single column grid on the side of the businesses and managers to buy, and uses the GridTable for updating pricing, and whether or not something is affordable.
 
-Other than that there is no opinion on how you should structure your project. There is a `scenes` folder in `src` where the `HelloWorldScene.js` lives but you can do whatever you want.
+### Main business grid
 
-## Static Assets
+This is the grid of the businesses that can be clicked, also shows the manager and a progress of the clicks. It is also updated through the Phaser GridTable and interacting with the GameStateManager.
 
-Any static assets like images or audio files should be placed in the `public` folder. It'll then be served at http://localhost:8000/images/my-image.png
+### businesses.json
 
-Example `public` structure:
+This is the datamodel I came up with for businesses, all businesses are loaded from this file:
+
+Here is an example:
 
 ```
-    public
-    ├── images
-    │   ├── my-image.png
-    ├── music
-    │   ├── ...
-    ├── sfx
-    │   ├── ...
+  {
+    name: 'PPE Manufacturer',
+    managerName: 'PPE Manager',
+    basePrice: 1,
+    multiplier: 1,
+    managerPrice: 10000,
+    clickTime: 0.5,
+    image: 'assets/sprites/ppe-mask.png',
+    buildingImage: 'assets/sprites/smaller_building_1.png',
+  },
 ```
 
-They can then be loaded by Phaser with `this.image.load('my-image', 'images/my-image.png')`.
+`name` - the name of the given business, displayed on the buy button for the business
 
-## Class Properties Support
+`managerName` - the name to display on the buy button for a manager...
 
-If you want to use the modern ES6 class properties feature then you'll need to add a `.babelrc` file at the project root with the `@babel/plugin-proposal-class-properties` plugin.
+`basePrice` - the first price of the business
 
-```
-{
-	"presets": [
-		"env"
-	],
-	"plugins": [
-		"@babel/plugin-proposal-class-properties"
-	]
-}
-```
+`multiplier` - the multiplier of how much the price goes up on each buy
 
-Parcel should automatically install the necessary dependencies.
+`managerPrice` - the price of the manager for the given business
 
-If you run into an error about mismatched major versions then go into `package.json` to see what the major versions for `@babel/core` and `@babel/plugin-proposal-class-properties` are.
+`clickTime` - how many seconds business takes to produce money after being clicked
 
-Reinstall one or the other manually to make the versions match 😉
+`image` - the icon used for displaying related to the business
 
-## TypeScript
+`buildingImage` - the sprite used for the building on the main business grid.
 
-It just works. (Thanks to Parcel)
 
-You can rename all the `.js` files to `.ts` and start using TypeScript.
 
-You may also want to add a `tsconfig.json` file to the project root like this:
-
-```
-{
-	"compilerOptions": {
-		"target": "es2016",
-		"module": "es6",
-		"strict": true,
-		"noImplicitAny": false,
-		"noEmit": true,
-		"allowJs": true,
-		"jsx": "preserve",
-		"importHelpers": true,
-		"moduleResolution": "node",
-		"experimentalDecorators": true,
-		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
-		"sourceMap": true,
-		"baseUrl": "./src",
-		"paths": {
-		  "~/*": ["./*"]
-		},
-		"typeRoots": [
-			"node_modules/@types",
-			"node_module/phaser/types"
-		],
-		"types": [
-			"phaser"
-		]
-	},
-	"include": [
-		"src/**/*"
-	]
-}
-```
-
-[More information on `tsconfig.json` options here.](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html)
-
-[Note on how Parcel handles `baseUrl` and `paths`.](https://gist.github.com/croaky/e3394e78d419475efc79c1e418c243ed)
-
-## Flow
-
-It just works. (Thanks to Parcel)
-
-Just put `// @flow` at the top of your `.js` files. Parcel will handle the rest.
-
-[Go here for more information on how to use Flow](https://flow.org/).
-
-## Dev Server Port
-
-You can change the dev server's port number by modifying the `start` script in `package.json`. We use Parcel's `-p` option to specify the port number.
-
-The script looks like this:
-
-```
-parcel src/index.html -p 8000
-```
-
-Change 8000 to whatever you want.
-
-## Other Notes
-
-[parcel-plugin-clean-easy](https://github.com/lifuzhao100/parcel-plugin-clean-easy) is used to ensure only the latest files are in the `dist` folder. You can modify this behavior by changing `parcelCleanPaths` in `package.json`.
-
-[parcel-plugin-static-files](https://github.com/elwin013/parcel-plugin-static-files-copy#readme) is used to copy static files from `public` into the output directory and serve it. You can add additional paths by modifying `staticFiles` in `package.json`.
-
-## License
-
-[MIT License](https://github.com/ourcade/phaser3-parcel-template/blob/master/LICENSE)
