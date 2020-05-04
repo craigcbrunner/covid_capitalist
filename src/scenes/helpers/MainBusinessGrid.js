@@ -2,16 +2,24 @@ import { GridTable } from 'phaser3-rex-plugins/templates/ui/ui-components';
 import RoundRectangle from 'phaser3-rex-plugins/plugins/roundrectangle';
 import GameStateManager from '../../utils/GameStateManager';
 import constants from '../../utils/constants';
+import { Game } from 'phaser';
 
 
 const SCROLL_BAR_COLOR = 0xFFCC00;
 const SCROLL_BAR_BG_COLOR = 0x808080;
 const STATUS_BAR_BORDER_COLOR = 0xFFCC00;
+const BODY_X_OFFSET = 85;
+const BODY_Y_OFFSET = 50;
+
+const INFECTED_COLOR = 0x963d5a;
+
 
 const CELL_WIDTH = 200;
 const CELL_HEIGHT = 200;
 
 let previousBusinessesBuilt = 0;
+
+let previousInfections = 0;
 
 let table;
 
@@ -23,6 +31,7 @@ const StatusBars = {};
 class MainBusinessGrid {
   constructor(scene) {
     this.scene = scene;
+    this.containers = [];
   }
 
     // call back when the full click time completes
@@ -66,21 +75,41 @@ class MainBusinessGrid {
       };
     }
 
-    // update the progress bar of teh click animation
-    updateProgressBar = (name, progress) => {
+    // update the progress bar of the click animation, and infects the progress bar
+    updateProgressBar = (name, progress, isInfected = false) => {
       const currStatusBar = StatusBars[name];
 
       // update the bar size...
+  
       currStatusBar.setDisplaySize(100 * progress, 24);
       currStatusBar.setSize(100 * progress, 24);
+
+      // set progress to infected if building is infected
+      if (isInfected) {
+        currStatusBar.setFillStyle(INFECTED_COLOR, 0.6);
+
+      }
+      else {
+        currStatusBar.setFillStyle(SCROLL_BAR_COLOR, 0.6);
+      }
     }
+
+
 
     // go through all the currently running clicks and update their progress bars
     updateClicks = () => {
       Object.keys(ClickedBusinesses).forEach((name) => {
         const currentProgress = ClickedBusinesses[name].timer.getOverallProgress();
+        const isInfected = GameStateManager.isInfected(name);
+        // pause click timer if we are infected
+        if (isInfected) {
+          ClickedBusinesses[name].timer.paused = true;
+        }
+        else {
+          ClickedBusinesses[name].timer.paused = false;
+        }
 
-        this.updateProgressBar(name, currentProgress);
+        this.updateProgressBar(name, currentProgress, isInfected);
       });
     }
 
@@ -89,15 +118,18 @@ class MainBusinessGrid {
     renderBusiness = (cell, cellContainer) => {
       const { item } = cell;
 
-
       const {
         name, prevPrice, clickTime, hasManager,
       } = item;
       if (cellContainer === null) {
         cellContainer = this.scene.add.container(0, 0);
-        const buildingImage = this.scene.add.image(35, 0, `${name}-building`);
+        this.containers.push(cellContainer);
+
+        const buildingImage = this.scene.add.sprite(35, 0, `${name}-building`);
         buildingImage.setDisplaySize(100, 100);
         buildingImage.setDisplayOrigin(0, 0);
+        buildingImage.setName('building');
+
         cellContainer.add(buildingImage);
 
         const managerIcon = this.scene.add.image(150, 100, 'manager');
@@ -156,6 +188,8 @@ class MainBusinessGrid {
         cellContainer.getByName('manager-icon').setVisible(true);
       }
 
+      cellContainer.setName(name);
+
       return cellContainer;
     }
 
@@ -164,7 +198,7 @@ class MainBusinessGrid {
       const operatingBusinesses = GameStateManager.getOperatingBusinesses();
       operatingBusinesses.forEach((business) => {
         const { hasManager, clickTime, name } = business;
-        if (hasManager) {
+        if (hasManager && !GameStateManager.isInfected(name)) {
           this.clickBusiness(name, clickTime, true);
         }
       });
@@ -173,12 +207,30 @@ class MainBusinessGrid {
     // create or update the currently purchased businesses
     createAndUpdateBusinesses = () => {
       const currentBusinessesCount = GameStateManager.getCurrentBusinessCount();
-      if (currentBusinessesCount > previousBusinessesBuilt) {
+      if (currentBusinessesCount > previousBusinessesBuilt || previousInfections !== GameStateManager.getInfectedCount()) {
         const operatingBusinesses = GameStateManager.getOperatingBusinesses();
         table.setItems(operatingBusinesses);
         table.layout();
         previousBusinessesBuilt += 1;
+
+        // add colliders on top of the buildings, 
+        // because the container colliders and sprite
+        // colliders won't work with the grid
+        this.buildingsGroup.clear(true, true);
+        this.containers.forEach((container) => {
+          const currCollider = this.scene.add.rectangle(container.x + BODY_X_OFFSET, container.y + BODY_Y_OFFSET, CELL_WIDTH / 5, CELL_HEIGHT / 5, 0xfff, 0);
+          currCollider.setName(container.name);
+          this.buildingsGroup.add(currCollider);
+        });
+
+        previousInfections = GameStateManager.getInfectedCount();
       }
+    }
+
+    // create a collision group for buildings to covids
+    createBuildingsGroup = () => {
+      this.buildingsGroup = this.scene.physics.add.staticGroup();
+      return this.buildingsGroup;
     }
 
     // create the business grid

@@ -3,8 +3,11 @@ import businesses from '../data/businesses';
 let currentMoney;
 let currentBusinesses = [];
 let businessList = {};
+const infectedList = {};
 
 let businessCount;
+
+let infectedCount;
 
 const AUTO_SAVE_INTERVAL = 10000;
 const LOCAL_STORAGE_NAME = 'COVID_CAPITALIST_GAME_SAVE';
@@ -67,6 +70,31 @@ class GameStateManagerSingleton {
       localStorage.setItem(LOCAL_STORAGE_NAME, stateString);
     }, AUTO_SAVE_INTERVAL);
   }
+
+    // set a business as infected by covid...
+    addInfection = (name) => {
+      if (!infectedList[name]) {
+        infectedList[name] = 1;
+      } else {
+        infectedList[name] += 1;
+      }
+      infectedCount += 1;
+    }
+
+      // set a business as infected by covid...
+      removeInfection = (name) => {
+        infectedList[name] -= 1;
+        if (infectedList[name] < 0) {
+          infectedList[name] = 0;
+        }
+        infectedCount -= 1;
+      }
+
+      // returns if business is infected
+      isInfected = (name) => !!infectedList[name]
+
+      // returns total infected count
+      getInfectedCount = () => infectedCount;
 
     // return the current money
     getMoney = () => currentMoney
