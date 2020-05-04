@@ -2,12 +2,12 @@
 	font-family: "biohazard";
 	font-style: normal;
 	font-weight: 400;
-	src: url("/assets/css/biohazard.ttf");
+	src: url("https://craigcbrunner.github.io/covid_capitalist/demo/assets/css/biohazard.ttf");
 }
 
 @font-face {
 	font-family: "money";
 	font-style: normal;
 	font-weight: 400;
-	src: url("/assets/css/bad_guy_black.ttf");
+	src: url("https://craigcbrunner.github.io/covid_capitalist/demo/assets/css/bad_guy_black.ttf");
 }
