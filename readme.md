@@ -5,7 +5,7 @@ A short cookie clicker game, with a viral theme, by Craig Brunner, build on phas
 
 This was just an experiment for me to learn more about game development in PhaserJS, and also test out Parcel.
 
-This game is fully client side and doesn't have any serverside portion at the moment.
+This game is fully client side and doesn't have any serverside portion at the moment. All art was used from the internet, I claim no rights to them and were only used for sample purposes for this non profit project. I tried to use OpenGameArt for the majority of art.
 
 ### Usage
 Check out the repository and run:
@@ -97,6 +97,17 @@ Here is an example:
 `image` - the icon used for displaying related to the business
 
 `buildingImage` - the sprite used for the building on the main business grid.
+
+
+## What I haven't gotten to
+
+* Responsive design, right now the size is fixed
+* Server side statemanagement, saving, anti cheat, leaderboards
+* In game tutorial
+* Music, sound effects, animation
+* Performance fixes, less re-renders of buy panel and main grid
+
+
 
 
 
