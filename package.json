@@ -35,7 +35,7 @@
 		"css": "^2.2.4",
 		"phaser": "^3.22.0",
 		"phaser-ui-tools": "^2.0.0-beta",
-		"phaser3-rex-plugins": "^1.1.13"
+		"phaser3-rex-plugins": "^1.1.79"
 	},
 	"parcelCleanPaths": [
 		"dist"
